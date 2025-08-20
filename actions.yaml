@@ -1,0 +1,22 @@
+categories:
+  - name: "alist监控"
+    actions:
+      - title: "开启云盘监控"
+        command: "start alist monitor"
+        event_id: "emecd7d2809"
+        confirm: false
+      - title: "关闭云盘监控"
+        command: "stop alist monitor"
+        event_id: "emecd80la0a"
+        confirm: false
+  
+  - name: "日志清理"
+    actions:
+      - title: "清理tmp日志"
+        command: "clear tmp log"
+        event_id: "em8f17q2v1h"
+        confirm: true
+      - title: "清理seafile日志"
+        command: "clear sf log"
+        event_id: "emdttk20scr"
+        confirm: true

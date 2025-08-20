@@ -1,0 +1,21 @@
+services:
+  tg-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cronicle-tg-bot
+    restart: unless-stopped
+    volumes:
+      - ./.env:/app/.env
+      - ./actions.yaml:/app/actions.yaml
+    ports:
+      - "8443:8443"
+      - "8080:8080"  # 健康检查端口
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s

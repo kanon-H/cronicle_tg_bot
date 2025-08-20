@@ -1,0 +1,111 @@
+# Cronicle Telegram Bot
+
+这是一个用于控制NAS上Cronicle任务的Telegram机器人，通过Webhook模式运行，支持通过按钮和命令触发Cronicle事件。
+
+## 功能特点
+
+- 基于Webhook模式的Telegram Bot
+- 支持按钮菜单和命令触发Cronicle事件
+- 支持用户权限控制
+- 支持动作二次确认
+- 支持Docker部署
+- 内置健康检查服务
+
+## 快速开始
+
+### 前提条件
+
+- 一个已创建的Telegram Bot（通过BotFather获取Token）
+- 一个可公网访问的域名，并配置了Nginx反向代理和SSL证书
+- Cronicle API访问权限
+
+### 配置步骤
+
+1. 复制环境变量示例文件并修改
+
+```bash
+cp .env.example .env
+```
+
+2. 编辑`.env`文件，填入必要的配置信息
+
+```
+# Telegram配置
+BOT_TOKEN=your_telegram_token
+ALLOWED_USER_IDS=your_telegram_user_id
+
+# NAS API配置
+API_BASE_URL=http://your-nas-ip:3012
+API_KEY=your_api_key
+
+# Webhook配置
+WEBHOOK_HOST=yourdomain.com
+```
+
+3. 编辑`actions.yaml`文件，配置你需要的动作
+
+```yaml
+categories:
+  - name: "示例分类"
+    actions:
+      - title: "示例动作"
+        command: "example action"
+        event_id: "your_cronicle_event_id"
+        confirm: true  # 是否需要二次确认
+```
+
+### 使用Docker部署
+
+```bash
+docker-compose up -d
+```
+
+### Nginx反向代理配置
+
+本项目设计为通过Nginx进行SSL终结，以下是一个示例Nginx配置：
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name your-domain.com;
+    
+    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+    
+    location /webhook/your_bot_token {
+        proxy_pass http://localhost:8443;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+## 健康检查
+
+机器人内置了健康检查服务，可通过以下URL访问：
+
+```
+http://your-server:8080/health
+```
+
+正常情况下会返回：
+
+```json
+{"status": "ok"}
+```
+
+## 命令列表
+
+- `/start` - 打开控制菜单
+- `/help` - 查看使用帮助
+- `/status` - 检查机器人状态
+- `/webhook_status` - 查看Webhook状态
+
+此外，所有在`actions.yaml`中配置的动作都会自动生成对应的命令。
+
+## 注意事项
+
+- 确保Nginx配置了正确的SSL证书和反向代理设置
+- 确保Telegram Bot Token正确
+- 确保API_KEY有权限执行Cronicle事件
+- 确保ALLOWED_USER_IDS设置正确，以防止未授权访问
