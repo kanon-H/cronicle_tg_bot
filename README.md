@@ -30,16 +30,22 @@ cp .env.example .env
 2. 编辑`.env`文件，填入必要的配置信息
 
 ```
-# Telegram配置
+# Telegram 配置
 BOT_TOKEN=your_telegram_token
-ALLOWED_USER_IDS=your_telegram_user_id
+ALLOWED_USER_IDS=123456789
 
-# NAS API配置
+# NAS API 配置
 API_BASE_URL=http://your-nas-ip:3012
 API_KEY=your_api_key
 
-# Webhook配置
-WEBHOOK_HOST=yourdomain.com
+# Webhook 域名（使用公网IP或域名）
+# 如果设置为localhost或127.0.0.1，将自动切换到轮询模式
+# 生产环境请设置为可从外网访问的域名或IP
+WEBHOOK_HOST=127.0.0.1
+# Webhook端口（默认8443）
+WEBHOOK_PORT=8443
+# Webhook路径（默认为/webhook/BOT_TOKEN）
+WEBHOOK_PATH=/webhook/BOT_TOKEN%
 ```
 
 3. 编辑`actions.yaml`文件，配置你需要的动作
