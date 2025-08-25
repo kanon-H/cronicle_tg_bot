@@ -15,7 +15,8 @@ from telegram import (
     BotCommand,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    BotCommandScopeDefault
+    BotCommandScopeDefault,
+    CallbackQuery
 )
 from telegram.constants import ParseMode
 from telegram.ext import (
@@ -236,13 +237,27 @@ async def dynamic_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             expected_cmd = action.get("command", action["title"])
             expected_cmd = re.sub(r"[^a-z0-9_]", "", str(expected_cmd).lower())
             if command == expected_cmd:
-                # 模拟按钮点击
-                update.callback_query = type('', (), {
-                    'data': f"act:{cat_idx}:{act_idx}",
-                    'edit_message_text': lambda x: None,
-                    'answer': lambda: None
-                })
-                await button_router(update, context)
+                # 创建一个模拟的CallbackQuery对象
+                from telegram import CallbackQuery
+                
+                # 构造CallbackQuery需要的数据
+                callback_data = f"act:{cat_idx}:{act_idx}"
+                
+                # 创建一个假的callback_query对象来传递给button_router
+                fake_callback_query = CallbackQuery(
+                    id="fake_id", 
+                    from_user=update.effective_user, 
+                    chat=update.effective_chat, 
+                    data=callback_data
+                )
+                
+                # 创建一个新的Update对象，包含fake_callback_query
+                fake_update = Update(
+                    update_id=update.update_id,
+                    callback_query=fake_callback_query
+                )
+                
+                await button_router(fake_update, context)
                 return
     
     await update.message.reply_text("⚠️ 未找到该命令，请输入 /help 查看可用命令")
