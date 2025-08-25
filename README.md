@@ -131,6 +131,8 @@ http://your-server:8080/health
 - 当向`main`分支发起Pull Request时
 - 当向`main`分支推送且`version.py`文件发生变动时（触发版本发布）
 
+注意：Docker镜像构建工作流已修改为仅通过Release工作流调用，避免每次提交代码都触发构建。
+
 ### 配置
 
 工作流使用以下GitHub Secrets进行认证：
@@ -155,6 +157,8 @@ __version__ = "1.0.0"  # 更新为新的版本号
 ```
 
 当向`main`分支推送包含`version.py`文件变动的提交时，将自动触发Release工作流。工作流会检查当前最新release的版本号是否与`version.py`中的版本号一致，只有在版本号不一致时才会构建并推送带有新版本号和latest标签的Docker镜像。
+
+Docker镜像构建工作流已修改为仅通过Release工作流调用，避免每次提交代码都触发构建。
 
 ### 手动触发Release工作流
 

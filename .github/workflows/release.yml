@@ -58,11 +58,15 @@ jobs:
             
             if (releases.length > 0) {
               const latestRelease = releases[0];
+              console.log(`Latest release tag: ${latestRelease.tag_name}`);
               const latestVersion = latestRelease.tag_name.replace('v', '');
+              console.log(`Latest version (without v): ${latestVersion}`);
+              console.log(`New version: ${newVersion}`);
               releaseExists = (latestVersion === newVersion);
+            } else {
+              console.log("No releases found");
             }
             
-            console.log(`New version: ${newVersion}`);
             console.log(`Release exists: ${releaseExists}`);
             
             return releaseExists;
