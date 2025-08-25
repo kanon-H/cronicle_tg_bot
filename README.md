@@ -142,14 +142,23 @@ http://your-server:8080/health
 
 工作流会自动为以下情况打标签：
 
-- 分支名称（用于分支推送）
+- latest（最新版本）
+- 版本号（从version.py文件中获取）
 - PR编号（用于Pull Request）
-- 版本号（用于标签推送，例如`v1.0.0`）
-- 主版本和次版本号（例如`v1.0`）
+
+### 更新版本号
+
+要更新项目的版本号，请修改`version.py`文件中的`__version__`变量：
+
+```python
+__version__ = "1.0.0"  # 更新为新的版本号
+```
+
+当向`main`分支推送包含`version.py`文件变动的提交时，将自动触发Release工作流，构建并推送带有新版本号和latest标签的Docker镜像。
 
 ### 手动触发Release工作流
 
-你可以通过GitHub界面手动触发Release工作流：
+你也可以通过GitHub界面手动触发Release工作流：
 
 1. 在GitHub仓库页面，点击"Actions"选项卡
 2. 在左侧边栏中，选择"Release"工作流
