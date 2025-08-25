@@ -268,15 +268,25 @@ async def dynamic_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """处理按钮回调"""
     query = update.callback_query
-    await query.answer()
+    try:
+        await query.answer()
+    except Exception as e:
+        logger.warning(f"回答CallbackQuery失败: {e}")
+        # 如果回答CallbackQuery失败，可能是因为超时，我们仍然继续处理
     
     if not user_allowed(update):
-        await query.edit_message_text("⛔ 无权限")
+        try:
+            await query.edit_message_text("⛔ 无权限")
+        except Exception as e:
+            logger.warning(f"编辑消息失败: {e}")
         return
 
     data = query.data
     if data == "back":
-        await query.edit_message_text("请选择分类：", reply_markup=build_categories_keyboard())
+        try:
+            await query.edit_message_text("请选择分类：", reply_markup=build_categories_keyboard())
+        except Exception as e:
+            logger.warning(f"编辑消息失败: {e}")
     elif data.startswith("cat:"):
         cat_idx = int(data.split(":")[1])
         cat = ACTIONS["categories"][cat_idx]
@@ -284,7 +294,10 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton(action["title"], callback_data=f"act:{cat_idx}:{idx}")]
             for idx, action in enumerate(cat["actions"])
         ] + [[InlineKeyboardButton("⬅ 返回", callback_data="back")]])
-        await query.edit_message_text(f"分类：{cat['name']}", reply_markup=keyboard)
+        try:
+            await query.edit_message_text(f"分类：{cat['name']}", reply_markup=keyboard)
+        except Exception as e:
+            logger.warning(f"编辑消息失败: {e}")
     elif data.startswith("act:"):
         parts = data.split(":")
         cat_idx, act_idx = int(parts[1]), int(parts[2])
@@ -294,7 +307,10 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
         event_id = act.get("event_id", "")
         
         if not event_id:
-            await query.edit_message_text("❗ 缺少event_id配置")
+            try:
+                await query.edit_message_text("❗ 缺少event_id配置")
+            except Exception as e:
+                logger.warning(f"编辑消息失败: {e}")
             return
 
         # 二次确认
@@ -303,11 +319,17 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [InlineKeyboardButton("✅ 确认执行", callback_data=f"act:{cat_idx}:{act_idx}:ok")],
                 [InlineKeyboardButton("❌ 取消", callback_data=f"cat:{cat_idx}")]
             ])
-            await query.edit_message_text(f"确认执行：{title}？", reply_markup=confirm_kb)
+            try:
+                await query.edit_message_text(f"确认执行：{title}？", reply_markup=confirm_kb)
+            except Exception as e:
+                logger.warning(f"编辑消息失败: {e}")
             return
 
         # 执行动作
-        await query.edit_message_text(f"🔄 正在执行: {title}...")
+        try:
+            await query.edit_message_text(f"🔄 正在执行: {title}...")
+        except Exception as e:
+            logger.warning(f"编辑消息失败: {e}")
         try:
             result = await api_run_event(event_id)
             response = (
@@ -319,10 +341,16 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"状态码: {result['status_code']}\n"
                 f"错误: \n```\n{truncate(result['text'], 3000)}\n```"
             )
-            await query.edit_message_text(response, parse_mode=ParseMode.MARKDOWN)
+            try:
+                await query.edit_message_text(response, parse_mode=ParseMode.MARKDOWN)
+            except Exception as e:
+                logger.warning(f"编辑消息失败: {e}")
         except Exception as e:
             logger.error(f"执行失败: {str(e)}")
-            await query.edit_message_text(f"❌ 执行异常: {str(e)}")
+            try:
+                await query.edit_message_text(f"❌ 执行异常: {str(e)}")
+            except Exception as e:
+                logger.warning(f"编辑消息失败: {e}")
 
 async def version_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """处理/version命令"""
