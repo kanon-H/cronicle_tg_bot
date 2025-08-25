@@ -154,7 +154,7 @@ http://your-server:8080/health
 __version__ = "1.0.0"  # 更新为新的版本号
 ```
 
-当向`main`分支推送包含`version.py`文件变动的提交时，将自动触发Release工作流，构建并推送带有新版本号和latest标签的Docker镜像。
+当向`main`分支推送包含`version.py`文件变动的提交时，将自动触发Release工作流。工作流会检查当前最新release的版本号是否与`version.py`中的版本号一致，只有在版本号不一致时才会构建并推送带有新版本号和latest标签的Docker镜像。
 
 ### 手动触发Release工作流
 
