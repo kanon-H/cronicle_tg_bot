@@ -2,6 +2,11 @@ name: Build and Push Docker Image
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: 'Version to build'
+        required: false
+        type: string
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -29,7 +34,11 @@ jobs:
       - name: Get version from version.py
         id: get_version
         run: |
-          VERSION=$(python -c "import version; print(version.__version__)")
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION=${{ github.event.inputs.version }}
+          else
+            VERSION=$(python -c "import version; print(version.__version__)")
+          fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 

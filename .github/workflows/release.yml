@@ -99,6 +99,9 @@ jobs:
               repo: context.repo.repo,
               workflow_id: 'docker-build-push.yml',
               ref: context.ref,
+              inputs: {
+                version: process.env.VERSION
+              }
             })
 
       - name: Wait for Docker Build and Push Workflow
