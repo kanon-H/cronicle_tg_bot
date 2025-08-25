@@ -250,6 +250,8 @@ async def dynamic_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     chat_instance=str(update.effective_chat.id), 
                     data=callback_data
                 )
+                # 关联bot到fake_callback_query对象
+                fake_callback_query.set_bot(context.bot)
                 
                 # 创建一个新的Update对象，包含fake_callback_query
                 fake_update = Update(
