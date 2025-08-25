@@ -136,7 +136,7 @@ http://your-server:8080/health
 工作流使用以下GitHub Secrets进行认证：
 
 - `DOCKERHUB_USERNAME`：Docker Hub用户名
-- `DOCKERHUB_TOKEN`：Docker Hub访问令牌
+- `DOCKERHUB_PASSWORD`：Docker Hub密码或访问令牌
 
 你需要在Docker Hub上创建一个访问令牌，并在GitHub仓库的Secrets设置中添加以上两个Secrets。
 
@@ -149,6 +149,15 @@ http://your-server:8080/health
 
 ### 手动触发Release工作流
 
+你可以通过GitHub界面手动触发Release工作流：
+
+1. 在GitHub仓库页面，点击"Actions"选项卡
+2. 在左侧边栏中，选择"Release"工作流
+3. 点击"Run workflow"按钮
+4. 输入版本号（例如：1.0.0）
+5. 选择是否创建发布草稿
+6. 点击"Run workflow"确认
+
 如果在手动触发Release工作流时遇到"Resource not accessible by integration"错误，请确保GitHub仓库的Actions权限设置正确。该工作流需要`contents: write`和`actions: write`权限来创建Release和触发其他工作流。
 
 ### 使用Docker镜像
@@ -156,7 +165,7 @@ http://your-server:8080/health
 构建的镜像可以通过以下方式拉取：
 
 ```bash
-docker pull your-dockerhub-username/repo-name:[tag]
+docker pull ${{ secrets.DOCKERHUB_USERNAME }}/cronicle-tg-bot:[tag]
 ```
 
-将`your-dockerhub-username`替换为你的Docker Hub用户名，`repo-name`替换为仓库名称，`[tag]`替换为相应的标签。
+将`${{ secrets.DOCKERHUB_USERNAME }}`替换为你的Docker Hub用户名，`[tag]`替换为相应的标签。
