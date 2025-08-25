@@ -63,7 +63,32 @@ categories:
 ### 使用Docker部署
 
 ```bash
-docker-compose up -d
+# docker
+docker pull kanonhua/cronicle_tg_bot:latest
+```
+
+### 使用docker-compose部署
+
+```bash
+services:
+  tg-bot:
+    image: kanonhua/cronicle_tg_bot:latest
+    container_name: cronicle-tg-bot
+    restart: unless-stopped
+    volumes:
+      - ./.env:/app/.env
+      - ./actions.yaml:/app/actions.yaml
+    ports:
+      - "8443:443"
+      - "18080:8080"  # 健康检查端口
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
 ```
 
 ### Nginx反向代理配置
@@ -153,7 +178,7 @@ http://your-server:8080/health
 要更新项目的版本号，请修改`version.py`文件中的`__version__`变量：
 
 ```python
-__version__ = "1.0.0"  # 更新为新的版本号
+__version__ = "v1.0.0"  # 更新为新的版本号
 ```
 
 当向`main`分支推送包含`version.py`文件变动的提交时，将自动触发Release工作流。工作流会检查当前最新release的版本号是否与`version.py`中的版本号一致，只有在版本号不一致时才会构建并推送带有新版本号和latest标签的Docker镜像。
