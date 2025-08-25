@@ -115,3 +115,39 @@ http://your-server:8080/health
 - 确保Telegram Bot Token正确
 - 确保API_KEY有权限执行Cronicle事件
 - 确保ALLOWED_USER_IDS设置正确，以防止未授权访问
+
+## GitHub Actions
+
+本项目包含一个GitHub Actions工作流，用于自动构建Docker镜像并推送到Docker Hub。
+
+### 工作流触发条件
+
+- 当向`main`分支推送代码时
+- 当创建以`v`开头的标签时（例如`v1.0.0`）
+- 当向`main`分支发起Pull Request时
+
+### 配置
+
+工作流使用以下GitHub Secrets进行认证：
+
+- `DOCKERHUB_USERNAME`：Docker Hub用户名
+- `DOCKERHUB_TOKEN`：Docker Hub访问令牌
+
+你需要在Docker Hub上创建一个访问令牌，并在GitHub仓库的Secrets设置中添加以上两个Secrets。
+
+工作流会自动为以下情况打标签：
+
+- 分支名称（用于分支推送）
+- PR编号（用于Pull Request）
+- 版本号（用于标签推送，例如`v1.0.0`）
+- 主版本和次版本号（例如`v1.0`）
+
+### 使用Docker镜像
+
+构建的镜像可以通过以下方式拉取：
+
+```bash
+docker pull your-dockerhub-username/repo-name:[tag]
+```
+
+将`your-dockerhub-username`替换为你的Docker Hub用户名，`repo-name`替换为仓库名称，`[tag]`替换为相应的标签。
