@@ -247,7 +247,7 @@ async def dynamic_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 fake_callback_query = CallbackQuery(
                     id="fake_id", 
                     from_user=update.effective_user, 
-                    chat=update.effective_chat, 
+                    chat_instance=str(update.effective_chat.id), 
                     data=callback_data
                 )
                 
