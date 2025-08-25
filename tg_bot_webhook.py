@@ -26,6 +26,12 @@ from telegram.ext import (
     Application
 )
 
+# 导入版本信息
+try:
+    from version import __version__
+except ImportError:
+    __version__ = "unknown"
+
 # Ensure dependencies are installed:
 # pip install python-telegram-bot python-dotenv pyyaml httpx
 
@@ -157,7 +163,8 @@ def generate_bot_commands(actions_data: Dict[str, Any]) -> List[Tuple[str, str]]
         ("start", "打开控制菜单"),
         ("help", "查看使用帮助"),
         ("status", "检查机器人状态"),
-        ("webhook_status", "查看Webhook状态")
+        ("webhook_status", "查看Webhook状态"),
+        ("version", "查看当前版本")
     ])
     
     return commands
@@ -299,6 +306,10 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.error(f"执行失败: {str(e)}")
             await query.edit_message_text(f"❌ 执行异常: {str(e)}")
 
+async def version_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """处理/version命令"""
+    await update.message.reply_text(f"当前版本: {__version__}")
+
 # ================== 健康检查 ==================
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading
@@ -344,6 +355,7 @@ def main():
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("status", status_command))
     app.add_handler(CommandHandler("webhook_status", webhook_status))
+    app.add_handler(CommandHandler("version", version_command))
 
     # 动态注册所有命令
     for cmd, _ in [x for x in BOT_COMMANDS if x[0] not in ["start", "help", "status", "webhook_status"]]:

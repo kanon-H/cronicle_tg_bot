@@ -1,0 +1,104 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'version.py'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
+        default: '0.1.0'
+      draft:
+        description: 'Create release draft'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Get version from version.py
+        id: get_version
+        run: |
+          VERSION=$(python -c "import version; print(version.__version__)")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.VERSION }}
+          release_name: Release v${{ env.VERSION }}
+          draft: ${{ github.event.inputs.draft || false }}
+          prerelease: false
+
+      - name: Trigger Docker Build and Push Workflow
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'docker-build-push.yml',
+              ref: context.ref,
+            })
+
+      - name: Wait for Docker Build and Push Workflow
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const maxAttempts = 30;
+            const interval = 10000; // 10 seconds
+            
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              console.log(`Attempt ${attempt}/${maxAttempts}: Checking workflow status...`);
+              
+              // Get the list of workflow runs
+              const { data: workflowRuns } = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'docker-build-push.yml',
+                per_page: 5,
+                page: 1
+              });
+              
+              // Find the latest run
+              const latestRun = workflowRuns.workflow_runs[0];
+              
+              if (latestRun) {
+                console.log(`Latest workflow run status: ${latestRun.status}`);
+                
+                if (latestRun.status === 'completed') {
+                  if (latestRun.conclusion === 'success') {
+                    console.log('Docker build and push workflow completed successfully');
+                    return;
+                  } else {
+                    throw new Error(`Docker build and push workflow failed with conclusion: ${latestRun.conclusion}`);
+                  }
+                }
+              }
+              
+              if (attempt < maxAttempts) {
+                console.log(`Waiting ${interval/1000} seconds before next check...`);
+                await new Promise(resolve => setTimeout(resolve, interval));
+              }
+            }
+            
+            throw new Error('Docker build and push workflow did not complete within the expected time');

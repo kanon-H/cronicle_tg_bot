@@ -106,6 +106,7 @@ http://your-server:8080/health
 - `/help` - 查看使用帮助
 - `/status` - 检查机器人状态
 - `/webhook_status` - 查看Webhook状态
+- `/version` - 查看当前版本
 
 此外，所有在`actions.yaml`中配置的动作都会自动生成对应的命令。
 
@@ -118,13 +119,17 @@ http://your-server:8080/health
 
 ## GitHub Actions
 
-本项目包含一个GitHub Actions工作流，用于自动构建Docker镜像并推送到Docker Hub。
+本项目包含两个GitHub Actions工作流：
+
+1. 用于自动构建Docker镜像并推送到Docker Hub
+2. 用于版本发布和Docker镜像构建
 
 ### 工作流触发条件
 
 - 当向`main`分支推送代码时
 - 当创建以`v`开头的标签时（例如`v1.0.0`）
 - 当向`main`分支发起Pull Request时
+- 当向`main`分支推送且`version.py`文件发生变动时（触发版本发布）
 
 ### 配置
 
