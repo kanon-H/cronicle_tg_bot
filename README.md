@@ -147,6 +147,10 @@ http://your-server:8080/health
 - 版本号（用于标签推送，例如`v1.0.0`）
 - 主版本和次版本号（例如`v1.0`）
 
+### 手动触发Release工作流
+
+如果在手动触发Release工作流时遇到"Resource not accessible by integration"错误，请确保GitHub仓库的Actions权限设置正确。该工作流需要`contents: write`和`actions: write`权限来创建Release和触发其他工作流。
+
 ### 使用Docker镜像
 
 构建的镜像可以通过以下方式拉取：
