@@ -239,13 +239,14 @@ async def dynamic_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if command == expected_cmd:
                 # 创建一个模拟的CallbackQuery对象
                 from telegram import CallbackQuery
+                import uuid
                 
                 # 构造CallbackQuery需要的数据
                 callback_data = f"act:{cat_idx}:{act_idx}"
                 
                 # 创建一个假的callback_query对象来传递给button_router
                 fake_callback_query = CallbackQuery(
-                    id="fake_id", 
+                    id=str(uuid.uuid4()), 
                     from_user=update.effective_user, 
                     chat_instance=str(update.effective_chat.id), 
                     data=callback_data
