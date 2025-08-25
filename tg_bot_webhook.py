@@ -26,6 +26,7 @@ from telegram.ext import (
     ContextTypes,
     Application
 )
+from telegram.error import BadRequest
 
 # 导入版本信息
 try:
@@ -270,6 +271,13 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     try:
         await query.answer()
+    except BadRequest as e:
+        if "Query is too old" in str(e):
+            logger.warning(f"CallbackQuery已超时: {e}")
+            # 超时的查询无需进一步处理
+            return
+        else:
+            logger.warning(f"回答CallbackQuery失败: {e}")
     except Exception as e:
         logger.warning(f"回答CallbackQuery失败: {e}")
         # 如果回答CallbackQuery失败，可能是因为超时，我们仍然继续处理
@@ -277,6 +285,11 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not user_allowed(update):
         try:
             await query.edit_message_text("⛔ 无权限")
+        except BadRequest as e:
+            if "Query is too old" in str(e):
+                logger.warning(f"CallbackQuery已超时，无法编辑消息: {e}")
+            else:
+                logger.warning(f"编辑消息失败: {e}")
         except Exception as e:
             logger.warning(f"编辑消息失败: {e}")
         return
@@ -285,6 +298,11 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "back":
         try:
             await query.edit_message_text("请选择分类：", reply_markup=build_categories_keyboard())
+        except BadRequest as e:
+            if "Query is too old" in str(e):
+                logger.warning(f"CallbackQuery已超时，无法编辑消息: {e}")
+            else:
+                logger.warning(f"编辑消息失败: {e}")
         except Exception as e:
             logger.warning(f"编辑消息失败: {e}")
     elif data.startswith("cat:"):
@@ -296,6 +314,11 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ] + [[InlineKeyboardButton("⬅ 返回", callback_data="back")]])
         try:
             await query.edit_message_text(f"分类：{cat['name']}", reply_markup=keyboard)
+        except BadRequest as e:
+            if "Query is too old" in str(e):
+                logger.warning(f"CallbackQuery已超时，无法编辑消息: {e}")
+            else:
+                logger.warning(f"编辑消息失败: {e}")
         except Exception as e:
             logger.warning(f"编辑消息失败: {e}")
     elif data.startswith("act:"):
@@ -309,6 +332,11 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not event_id:
             try:
                 await query.edit_message_text("❗ 缺少event_id配置")
+            except BadRequest as e:
+                if "Query is too old" in str(e):
+                    logger.warning(f"CallbackQuery已超时，无法编辑消息: {e}")
+                else:
+                    logger.warning(f"编辑消息失败: {e}")
             except Exception as e:
                 logger.warning(f"编辑消息失败: {e}")
             return
@@ -321,6 +349,11 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ])
             try:
                 await query.edit_message_text(f"确认执行：{title}？", reply_markup=confirm_kb)
+            except BadRequest as e:
+                if "Query is too old" in str(e):
+                    logger.warning(f"CallbackQuery已超时，无法编辑消息: {e}")
+                else:
+                    logger.warning(f"编辑消息失败: {e}")
             except Exception as e:
                 logger.warning(f"编辑消息失败: {e}")
             return
@@ -328,6 +361,11 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 执行动作
         try:
             await query.edit_message_text(f"🔄 正在执行: {title}...")
+        except BadRequest as e:
+            if "Query is too old" in str(e):
+                logger.warning(f"CallbackQuery已超时，无法编辑消息: {e}")
+            else:
+                logger.warning(f"编辑消息失败: {e}")
         except Exception as e:
             logger.warning(f"编辑消息失败: {e}")
         try:
@@ -343,12 +381,22 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             try:
                 await query.edit_message_text(response, parse_mode=ParseMode.MARKDOWN)
+            except BadRequest as e:
+                if "Query is too old" in str(e):
+                    logger.warning(f"CallbackQuery已超时，无法编辑消息: {e}")
+                else:
+                    logger.warning(f"编辑消息失败: {e}")
             except Exception as e:
                 logger.warning(f"编辑消息失败: {e}")
         except Exception as e:
             logger.error(f"执行失败: {str(e)}")
             try:
                 await query.edit_message_text(f"❌ 执行异常: {str(e)}")
+            except BadRequest as e:
+                if "Query is too old" in str(e):
+                    logger.warning(f"CallbackQuery已超时，无法编辑消息: {e}")
+                else:
+                    logger.warning(f"编辑消息失败: {e}")
             except Exception as e:
                 logger.warning(f"编辑消息失败: {e}")
 
